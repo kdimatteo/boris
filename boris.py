@@ -4,6 +4,9 @@ from urlparse import urljoin
 from pysqlite2 import dbapi2 as sqlite
 import sys
 
+import nltk
+from nltk.collocations import *
+
 
 # Create a list of words to ignore
 ignorewords={'the':1,'of':1,'to':1,'and':1,'a':1,'in':1,'is':1,'it':1}
@@ -46,8 +49,21 @@ class Crawler:
     # Get the URL id
     urlid = self.getentryid('urllist', 'url', url)
 
+    bigram_measures = nltk.collocations.BigramAssocMeasures()
+
+    # change this to read in your data
+    #finder = BigramCollocationFinder.from_words(nltk.corpus.genesis.words('english-web.txt'))
+    finder = BigramCollocationFinder.from_words(words)
+
+    # only bigrams that appear 3+ times
+    finder.apply_freq_filter(3) 
+
+    # return the 5 n-grams with the highest PMI
+    tags = finder.nbest(bigram_measures.pmi, 5)  
+
+
     try:
-      c = self.con.execute("insert into wordbag(url, words, tags) values (?, ?, ?)" , (url, text, 'none'))
+      c = self.con.execute("insert into wordbag(url, words, tags) values (?, ?, ?)" , (url, text, tags))
     except:
       print "==> bogus wordbag insert"
 
