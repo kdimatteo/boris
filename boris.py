@@ -45,7 +45,7 @@ class Crawler:
     # Get the individual words
     text = self.gettextonly(soup)
     words = self.separatewords(text)
-    
+
     # Get the URL id
     urlid = self.getentryid('urllist', 'url', url)
 
@@ -60,10 +60,12 @@ class Crawler:
 
     # return the 5 n-grams with the highest PMI
     tags = finder.nbest(bigram_measures.pmi, 5)  
+    tags = str(tags)
 
 
     try:
-      c = self.con.execute("insert into wordbag(url, words, tags) values (?, ?, ?)" , (url, text, tags))
+      c = self.con.execute("insert into wordbag(url, words, tags) values (?, ?, ?)", (url, text, tags))
+      #c = self.con.execute("insert into wordbag(url, tags) values (?, ?)", (url, tags))
     except:
       print "==> bogus wordbag insert"
 
@@ -74,7 +76,9 @@ class Crawler:
       wordid = self.getentryid('wordlist', 'word', word)
       self.con.execute("insert into wordlocation(urlid, wordid, location) values (%d, %d, %d)" % (urlid, wordid, i))
 
+    self.dbcommit()
   
+
   # Extract the text from an HTML page (no tags)
   def gettextonly(self, soup):
     v = soup.string
@@ -139,7 +143,6 @@ class Crawler:
           self.addtoindex(page, soup)
 
           # recursion into sub pages
-          '''
           links = soup('a')
 
           for link in links:
@@ -156,8 +159,8 @@ class Crawler:
 
               #print linkText
               #self.addlinkref(page, url, linkText)
-          '''
-          self.dbcommit()
+        
+          #self.dbcommit()
         except:
           print "Could not parse page %s" % page
 
@@ -179,43 +182,13 @@ class Crawler:
     self.con.execute('create index urltoidx on link(toid)')
     self.con.execute('create index urlfromidx on link(fromid)')
     self.dbcommit()
-  """
-  def calculatepagerank(self,iterations=20):
-    # clear out the current page rank tables
-    self.con.execute('drop table if exists pagerank')
-    self.con.execute('create table pagerank(urlid primary key,score)')
-    
-    # initialize every url with a page rank of 1
-    for (urlid,) in self.con.execute('select rowid from urllist'):
-      self.con.execute('insert into pagerank(urlid,score) values (%d,1.0)' % urlid)
-    self.dbcommit()
-    
-    for i in range(iterations):
-      print "Iteration %d" % (i)
-      for (urlid,) in self.con.execute('select rowid from urllist'):
-        pr=0.15
-        
-        # Loop through all the pages that link to this one
-        for (linker,) in self.con.execute(
-        'select distinct fromid from link where toid=%d' % urlid):
-          # Get the page rank of the linker
-          linkingpr=self.con.execute(
-          'select score from pagerank where urlid=%d' % linker).fetchone()[0]
-
-          # Get the total number of links from the linker
-          linkingcount=self.con.execute(
-          'select count(*) from link where fromid=%d' % linker).fetchone()[0]
-          pr+=0.85*(linkingpr/linkingcount)
-        self.con.execute(
-        'update pagerank set score=%f where urlid=%d' % (pr,urlid))
-      self.dbcommit()
-  """
-
-
+ 
 
 if __name__ == "__main__":
   o = Crawler("test-db")
   o.createindextables()
+  
+  #start_url = [sys.argv[1]]
   start_url = ['http://www.cnet.com']
   o.crawl(start_url)
 
