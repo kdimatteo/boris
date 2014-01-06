@@ -7,7 +7,10 @@ With due resepect to Cliff & the Graffiti team who's work on a much more robust 
 Usage
 -----
 
-python
+`$python boris.py http://www.cnet.com results.db`
+
+Will create a sqlite file in ./data/
+
 
 
 Requirements
