@@ -150,7 +150,7 @@ class Crawler:
 
               url = urljoin(page, link['href'])
               #if url.find("'") != -1: continue
-              
+
               url = url.split('#')[0]  # remove location portion
               if url[0:4] == 'http' and not self.isindexed(url):
                 newpages[url] = 1
@@ -185,10 +185,10 @@ class Crawler:
  
 
 if __name__ == "__main__":
-  o = Crawler("test-db")
-  o.createindextables()
   
-  #start_url = [sys.argv[1]]
-  start_url = ['http://www.cnet.com']
+  start_url = [sys.argv[1]]
+  
+  o = Crawler(sys.argv[2])
+  o.createindextables()
   o.crawl(start_url)
 

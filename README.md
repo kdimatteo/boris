@@ -4,9 +4,14 @@ Spider and tag documents. Best used with small pools of documents (e.g., depatme
 
 With due resepect to Cliff & the Graffiti team who's work on a much more robust verion of this idea serves as inspiration 
 
+Usage
+-----
+
+python
+
 
 Requirements
 ------------
-BeautifulSoup
-nltk
-pysqlite
+* BeautifulSoup
+* nltk
+* pysqlite
