@@ -9,10 +9,11 @@ from nltk.collocations import *
 
 
 # Create a list of words to ignore
-ignorewords={'the':1,'of':1,'to':1,'and':1,'a':1,'in':1,'is':1,'it':1}
+ignorewords = {'the':1,'of':1,'to':1,'and':1,'a':1,'in':1,'is':1,'it':1}
 
 
 class Crawler:
+  
   # Initialize the crawler with the name of database
   def __init__(self, dbname):
     self.con=sqlite.connect("data/" + dbname)
@@ -69,12 +70,14 @@ class Crawler:
     except:
       print "==> bogus wordbag insert"
 
+    '''
     # Link each word to this url
     for i in range(len(words)):
       word = words[i]
       if word in ignorewords: continue
       wordid = self.getentryid('wordlist', 'word', word)
       self.con.execute("insert into wordlocation(urlid, wordid, location) values (%d, %d, %d)" % (urlid, wordid, i))
+    '''
 
     self.dbcommit()
   
@@ -108,21 +111,6 @@ class Crawler:
     else:
       return False
 
-
-  '''
-  # Add a link between two pages
-  def addlinkref(self,urlFrom,urlTo,linkText):
-    words=self.separateWords(linkText)
-    fromid=self.getentryid('urllist','url',urlFrom)
-    toid=self.getentryid('urllist','url',urlTo)
-    if fromid==toid: return
-    cur=self.con.execute("insert into link(fromid,toid) values (%d,%d)" % (fromid,toid))
-    linkid=cur.lastrowid
-    for word in words:
-      if word in ignorewords: continue
-      wordid=self.getentryid('wordlist','word',word)
-      self.con.execute("insert into linkwords(linkid,wordid) values (%d,%d)" % (linkid,wordid))
-  '''
   
   # Starting with a list of pages, do a breadth
   # first search to the given depth, indexing pages
@@ -171,23 +159,13 @@ class Crawler:
   def createindextables(self): 
     self.con.execute('create table urllist(url)')
     self.con.execute('create table wordlist(word)')
-    self.con.execute('create table wordlocation(urlid, wordid, location)')
-    self.con.execute('create table link(fromid integer,toid integer)')
-    self.con.execute('create table linkwords(wordid,linkid)')
     self.con.execute('create table wordbag(url, words, tags)')
-    #self.con.execute('create index bagid on wordbag(url)')
     self.con.execute('create index wordidx on wordlist(word)')
     self.con.execute('create index urlidx on urllist(url)')
-    self.con.execute('create index wordurlidx on wordlocation(wordid)')
-    self.con.execute('create index urltoidx on link(toid)')
-    self.con.execute('create index urlfromidx on link(fromid)')
     self.dbcommit()
  
-
 if __name__ == "__main__":
-  
-  start_url = [sys.argv[1]]
-  
+  start_url = [sys.argv[1]] 
   o = Crawler(sys.argv[2])
   o.createindextables()
   o.crawl(start_url)
